@@ -12,7 +12,7 @@ The program already handles the process of creating the tables, joining summariz
 
 ## Procediment
 
-![procediment-img](src\assets\imgs\Excel.PNG)
+![procediment-img](https://github.com/victordalosto/JDBC-fwd/blob/main/src/assets/imgs/Excel.PNG?raw=true)
 
 ![Java](https://img.shields.io/badge/Java-ff0000?style=for-the-badge&logo=java&logoColor=white)
 ![Microsoft Excel](https://img.shields.io/badge/Microsoft_Excel-217346?style=for-the-badge&logo=microsoft-excel&logoColor=white) 
