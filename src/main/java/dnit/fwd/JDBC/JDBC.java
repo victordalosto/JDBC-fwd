@@ -1,5 +1,5 @@
 
-package dnit.fwd.JDBC;
+package dnit.fwd.jdbc;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -19,22 +19,27 @@ public class JDBC {
     private final Connection connection;
     private final Statement statement;
     private String TABLE_NAME;
+    private String DB_NAME;
 
-    private PreparedStatement preparedQueryStatement; // removed, not implemented
+    private PreparedStatement prepResultStatement;
 
 
-    /* Constructor that makes a connection with a local database. */
+    /* Controller Constructor that makes a connection with a local database. */
     public JDBC(String DB_NAME) throws SQLException {
+        this.DB_NAME = DB_NAME;
         CONNECTION = "jdbc:mysql://localhost/" + DB_NAME + "?useTimezone=true&serverTimezone=UTC"; 
         connection = DriverManager.getConnection(CONNECTION, "root", "212329");
         connection.setAutoCommit(false);
         statement = connection.createStatement();
+        prepResultStatement = connection.prepareStatement("INSERT INTO result (id_snv, km) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+        System.out.println("Connected to database: "  + DB_NAME);
     }
 
 
 
     /* USE statement is used to select any existing database in the SQL schema. */
     public void useTable(String TABLE_NAME) throws SQLException {
+        System.out.println("From database: " + DB_NAME + ". Using table: " + TABLE_NAME);
         this.TABLE_NAME = TABLE_NAME;
     }
 
@@ -50,21 +55,21 @@ public class JDBC {
         for (int i = 0; i < statements.length - 1; i++)
             ALL_STATEMENT += statements[i] + ", ";
         ALL_STATEMENT += statements[statements.length - 1];
-        statement.execute("DROP TABLE IF EXISTS " + TABLE_NAME);
-        statement.execute("CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "(" + ALL_STATEMENT + ");");
+        runCommand("DROP TABLE IF EXISTS " + TABLE_NAME);
+        runCommand("CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "(" + ALL_STATEMENT + ");");
     }
 
 
     
     /* INSERT INTO database VALUES () */
-    public void insert(String... inserts) throws Exception {
-        insertUsingParameters("", inserts);
+    public int insert(String... inserts) throws Exception {
+        return insertUsingParameters("", inserts);
     }
 
 
 
     /* INSERT INTO database (parametersTypes) VALUES (inserts) */
-    public void insertUsingParameters(String parametersTypes, String... inserts) throws Exception {
+    public int insertUsingParameters(String parametersTypes, String... inserts) throws Exception {
         if (this.TABLE_NAME == null)
             throw new Exception("A table must be defined to be managed");
         if (parametersTypes == null) 
@@ -76,9 +81,20 @@ public class JDBC {
             ALL_INSERTS += "(" + convertString(inserts[i]) + "), ";
         ALL_INSERTS += "(" + convertString(inserts[inserts.length - 1]) + ")";
         if (parametersTypes != "") 
-            parametersTypes = " (" + parametersTypes + ")";
-        String sql = "INSERT INTO " + TABLE_NAME +  parametersTypes + " VALUES " + ALL_INSERTS;
-        statement.execute(sql);
+            parametersTypes = " (" + convertString(parametersTypes) + ")";
+        if (!TABLE_NAME.equals("result")) {
+            String sql = "INSERT INTO " + TABLE_NAME +  parametersTypes + " VALUES " + ALL_INSERTS;
+            runCommand(sql);
+            return 0;
+        } else {
+            System.out.println("INSERT INTO result (id_snv, km) VALUES (?, ?)");
+            prepResultStatement.setString(1, inserts[0].split(",")[0]);
+            prepResultStatement.setString(2, inserts[0].split(",")[1]);
+            prepResultStatement.executeUpdate();
+            ResultSet generatedKey= prepResultStatement.getGeneratedKeys();
+            generatedKey.next();
+            return generatedKey.getInt(1);
+        }
     }
 
 
@@ -114,37 +130,69 @@ public class JDBC {
 
 
 
+    /* Returns the first value of a query, or null */
+    public String queryValue(String colunName, String paramWHERE) throws Exception {
+        String sql = "SELECT " + colunName + " FROM " + TABLE_NAME + " WHERE " + paramWHERE;
+        System.out.println(sql);
+        ResultSet results = statement.executeQuery(sql);
+        if (results.next())
+            return results.getString(1);
+        else 
+            return null;
+    }
+
+
+
     /* DELETE FROM TABLENAME WHERE colunmName = value (NOT INJECTION SAFE)*/
     public void delete(String collunmName, String value) throws Exception {
-        statement.executeUpdate("DELETE FROM " + TABLE_NAME + " WHERE " + collunmName + " = " + value);
+        runUpdate("DELETE FROM " + TABLE_NAME + " WHERE " + collunmName + " = " + value);
     }
 
     
 
     /* update FROM TABLENAME WHERE colunmName = value (NOT INJECTION SAFE)*/
     public void update(String collunmName, String oldValue, String newValue) throws Exception {
-        statement.executeUpdate("UPDATE " + TABLE_NAME + " SET " + collunmName + " = " + newValue + " WHERE " + collunmName + " = " + oldValue);
-        System.out.println(statement.getUpdateCount());
+        runUpdate("UPDATE " + TABLE_NAME + " SET " + collunmName + " = " + newValue + " WHERE " + collunmName + " = " + oldValue);
     }
 
 
 
-    // Simple function that replaces ' with " to be used as string in java.
+    // Simple function that replaces ' with " to allow the use of ' as string in java.
     private String convertString(String text) {
         text = text.replaceAll("['\"`]+", "\"");
         return text;
     }
-    
 
 
+
+    /* Commits a transaction */
     public void commit() throws Exception {
+        System.out.println("Commiting values into: " + DB_NAME + "\n");
         connection.commit();
     }
-    
 
 
+
+    /* Rollsback a transaction */
     public void rollback() throws Exception {
+        System.out.println("Rolling back transaction from : " + DB_NAME + "\n");
         connection.rollback();
+    }
+
+
+
+    /* Execute a command in the DB */
+    public void runCommand(String sql) throws SQLException {
+        System.out.println(sql);
+        statement.execute(sql);
+    }
+
+
+
+    /* Execute a command in the DB */
+    private void runUpdate(String sql) throws SQLException {
+        System.out.println(sql);
+        statement.executeUpdate(sql);
     }
 
 
@@ -152,7 +200,7 @@ public class JDBC {
     /* Closes the connection of the current database instance */
     public void close() {
         TABLE_NAME = null;
-        try {preparedQueryStatement.close();} catch (Exception e) {}
+        try {prepResultStatement.close();} catch (Exception e) {}
         try {statement.close();} catch (Exception e) {}
         try {connection.close();} catch (Exception e) {}
     }

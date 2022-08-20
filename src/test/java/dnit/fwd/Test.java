@@ -1,17 +1,18 @@
 package dnit.fwd;
 
-import dnit.fwd.JDBC.JDBC;
+import dnit.fwd.jdbc.JDBC;
 
 public class Test {
    
+    /* Check if the main functionality of a database are working, like acessing, adding, modifing, deleting and fetching.*/
     @org.junit.Test
     public void HandlingDatabase() throws Exception {
 
         /* Creates a connection with a database. @arg (String) = schema name in localhost. */
-        JDBC jdbc = new JDBC("dnit-fwd");
+        JDBC jdbc = new JDBC("dnit_fwd");
 
         /* Select an existing database in the SQL schema */
-        jdbc.useTable("estado");
+        jdbc.useTable("estado_teste");
 
         /* DROP and create a table using multiple parameters */
         jdbc.createTable("ID INTEGER AUTO_INCREMENT PRIMARY KEY", "UF CHAR(2) UNIQUE NOT NULL");
@@ -32,7 +33,9 @@ public class Test {
         
         /* Query values from Database */
         jdbc.queryAll(); 
-        // jdbc.query(2); 
+        // jdbc.query(2);
+        
+        jdbc.runCommand("DROP TABLE estado_teste");
 
         /* Closes the connection */
         jdbc.close();
