@@ -16,7 +16,7 @@ public class Main {
         CreateView.fwd(jdbc);
 
         // Commands to push datas into the database from .csv files
-        ReadFromCSV.readAndpush("AC", jdbc);
+        ReadFromCSV.readAndPersist("assets\\AC.csv", jdbc);
 
     }
 }

@@ -2,11 +2,11 @@
 JDBC - fwd
 </h1><br>
 
-This is a Data processing program, which converts fwd test datas, that was previously stored in excel, to be manipulated using databases.
+This is a Data processing program, which converts fwd test data, that was previously stored in excel, to be manipulated using databases.
 
-The program uses JAVA, the <b>JDBC</b> API, and the MySQL Connector Drive to perform the procedure of opening the csv file, followed by the data validation, and persisting the data in the database, making the due mapping in the relational database.
+The program uses JAVA, the <b>JDBC</b> API, and the MySQL Connector Drive to perform the procedure of opening a CSV file, followed by the data validation and persisting the data in the database, making the due mapping in the relational database.
 
-The program already handles the process of creating the tables, joining summarized tablesin a view, and dumping all excel files inside the database.
+The program already handles the process of creating the tables, joining summarized tables in a view, and dumping all excel files inside the database.
 
 <div align="center">
 
