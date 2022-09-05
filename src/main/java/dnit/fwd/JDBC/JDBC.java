@@ -15,7 +15,7 @@ import java.sql.Statement;
  */
 public class JDBC {
 
-    private final String CONNECTION;
+    private final String pathDB;
     private final Connection connection;
     private final Statement statement;
     private String TABLE_NAME;
@@ -27,8 +27,8 @@ public class JDBC {
     /* Controller Constructor that makes a connection with a local database. */
     public JDBC(String DB_NAME) throws SQLException {
         this.DB_NAME = DB_NAME;
-        CONNECTION = "jdbc:mysql://localhost/" + DB_NAME + "?useTimezone=true&serverTimezone=UTC"; 
-        connection = DriverManager.getConnection(CONNECTION, "root", "212329");
+        pathDB = "jdbc:mysql://localhost/" + DB_NAME + "?useTimezone=true&serverTimezone=UTC"; 
+        connection = DriverManager.getConnection(pathDB, "root", "212329");
         connection.setAutoCommit(false);
         statement = connection.createStatement();
         prepResultStatement = connection.prepareStatement("INSERT INTO result (id_snv, km) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);

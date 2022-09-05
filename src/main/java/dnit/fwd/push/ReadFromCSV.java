@@ -18,7 +18,7 @@ import dnit.fwd.model.Hora;
 public class ReadFromCSV {
 
     private static Scanner scanner;
-    private static PersistRow persist;
+    private static PersistRow persistRow;
     private static Row currentRow = new Row();
 
 
@@ -26,9 +26,9 @@ public class ReadFromCSV {
 
 
     /* Read a csv file and persists its info into the database */
-    public static void readAndpush(String path, JDBC jdbc) throws Exception {
+    public static void readAndPersist(String path, JDBC jdbc) throws Exception {
         path = fixPath(path);
-        persist = new PersistRow(jdbc);
+        persistRow = new PersistRow(jdbc);
         scanner = new Scanner(new File(path), "UTF-8");
         scanner.nextLine();
         while (scanner.hasNextLine()) {
@@ -47,8 +47,8 @@ public class ReadFromCSV {
 
     /* Fixes the initial path to contains src\\asserts\\fileName.csv */
     private static String fixPath(String path) {
-        if (!path.startsWith("src\\assets"))
-            path = "src\\assets\\" + path;
+        if (!path.startsWith("assets"))
+            path = "assets\\" + path;
         if (!path.endsWith(".csv")) 
             path = path + ".csv";
         return path;
@@ -80,15 +80,15 @@ public class ReadFromCSV {
 
 
     private static void persistRow(String[] split, JDBC jdbc) throws Exception {
-        persist.state(currentRow.getId_state());
-        persist.snv(currentRow.getId_state(), currentRow.getBR(), 
+        persistRow.state(currentRow.getId_state());
+        persistRow.snv(currentRow.getId_state(), currentRow.getBR(), 
                         currentRow.getSNV(), currentRow.getPeriodo());
-        int id_result = persist.result(currentRow.getSNV(), currentRow.getKM());
-        persist.temperature(id_result, currentRow.getTemp());
-        persist.gps(id_result, currentRow.getGps());
-        persist.forca(id_result, currentRow.getForca(), currentRow.getPressao(), currentRow.getRaio());
-        persist.data(id_result, currentRow.getData(), currentRow.getHora());
-        persist.deflections(id_result, currentRow.getDeflections());
-        persist.observation(id_result, currentRow.getObs());
+        int id_result = persistRow.result(currentRow.getSNV(), currentRow.getKM());
+        persistRow.temperature(id_result, currentRow.getTemp());
+        persistRow.gps(id_result, currentRow.getGps());
+        persistRow.forca(id_result, currentRow.getForca(), currentRow.getPressao(), currentRow.getRaio());
+        persistRow.data(id_result, currentRow.getData(), currentRow.getHora());
+        persistRow.deflections(id_result, currentRow.getDeflections());
+        persistRow.observation(id_result, currentRow.getObs());
     }
 }
